@@ -1,3 +1,7 @@
+# Don't track lab-specifc data
+*.sqlite
+user_creds.rds
+
 # History files
 .Rhistory
 .Rapp.history
