@@ -336,7 +336,7 @@ dashboard_ui <- dashboardPage(
   skin = "blue",
   header = dashboardHeader(
     title = "dbMP: Database of Myelomas & Precursors",
-    titleWidth = 400,
+    titleWidth = 500,
     tags$li(
       class = "dropdown",
       style = "padding: 10px;",
