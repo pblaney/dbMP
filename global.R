@@ -208,14 +208,14 @@ patients_table_def <- data.frame(
 patient_template_info <- data.frame(
   `Column Name` = c("institution", "iid", "race", "sex"),
   `Description` = c(
-    "The institution where the patient is being seen.",
+    "The institution where the patient is being seen or 'Public' if from published dataset.",
     "The unique Institution ID for the patient. CANNOT already exist in the database.",
     "The patient's self-reported race.",
     "The patient's sex."
   ),
   `Example` = c("NYU", "NYU5678", "White", "Female"),
   `Allowed Values` = c(
-    "NYU, UAB, UMiami, MDAnderson, MSKCC",
+    "NYU, UAB, UMiami, MDAnderson, MSKCC, Public",
     "Free text",
     "Asian, Black or African American, Hispanic, White, Other, or NA",
     "Female, Male, or NA"
@@ -237,7 +237,7 @@ sample_template_info <- data.frame(
     "Date the sample was collected at site.",
     "Study timepoint for the sample at collection (e.g., Baseline, Progression).",
     "Patient's age in years at the time of the visit.",
-    "Patient's diagnosis at the time of sample collection.",
+    "Patient's diagnosis at the time of sample collection. One of MGUS, SMM, MM, RRMM, and PCL",
     "The type of biological sample. One of Bone Marrow (BM), Peripheral Blood (PB), or Stool (ST)",
     "Institution's unique aliquot ID for the physical specimen (use 'NA' if not applicable)."
   ),
@@ -247,7 +247,7 @@ sample_template_info <- data.frame(
     "YYYY-MM-DD format",
     "Free text",
     "Numeric",
-    "MGUS, SMM, MM, RR",
+    "MGUS, SMM, MM, RRMM, PCL",
     "BM, PB, ST",
     "Free text or NA"
   ),
@@ -336,7 +336,7 @@ dashboard_ui <- dashboardPage(
   skin = "blue",
   header = dashboardHeader(
     title = "dbMP: Database of Myelomas & Precursors",
-    titleWidth = 500,
+    titleWidth = 600,
     tags$li(
       class = "dropdown",
       style = "padding: 10px;",
@@ -426,7 +426,7 @@ dashboard_ui <- dashboardPage(
                              selectInput("patient_pmid", "Patient Master ID", choices = NULL)
                       ),
                       column(3,
-                             selectInput("patient_institution", "Institution", choices = c("UMiami", "MDAnderson", "MSKCC", "NYU", "UAB"))
+                             selectInput("patient_institution", "Institution", choices = c("UMiami", "MDAnderson", "MSKCC", "NYU", "UAB","Public"))
                       ),
                       column(3,
                              textInput("patient_iid", "Institution ID", placeholder = "e.g., NYU1234")
@@ -521,7 +521,7 @@ dashboard_ui <- dashboardPage(
                       column(3, dateInput("sample_visit_date", "Visit Date")),
                       column(3, textInput("sample_tpt", "Timepoint", placeholder = "e.g., Baseline")),
                       column(3, numericInput("sample_age", "Age at Visit", value = NA, min = 18)),
-                      column(3, selectInput("sample_diagnosis", "Diagnosis", choices = c("MGUS", "SMM", "MM", "RR")))
+                      column(3, selectInput("sample_diagnosis", "Diagnosis", choices = c("MGUS", "SMM", "MM", "RRMM", "PCL")))
                     ),
                     fluidRow(
                       column(3, selectInput("sample_type", "Sample Type", choices = c("BM", "PB", "ST"))),

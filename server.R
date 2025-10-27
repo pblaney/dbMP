@@ -298,7 +298,7 @@ function(input, output, session) {
       # 3. --- VALIDATION CHECKS ---
       # Check each row of the bulk upload
       # Initialize the allowed values
-      allowed_institution <- c("NYU","UAB","UMiami","MDAnderson","MSKCC")
+      allowed_institution <- c("NYU","UAB","UMiami","MDAnderson","MSKCC","Public")
       forbidden_chars_pattern <- "[!@#$%^&*()+={}|:;'`~,<>?/]"
       allowed_race <- c("Asian","Black or African American","Hispanic","White","Other",NA)
       allowed_sex <- c("Female","Male",NA)
@@ -662,7 +662,7 @@ function(input, output, session) {
       # 3. --- VALIDATION CHECKS ---
       # Check each row of the bulk upload
       # Initialize the allowed values
-      allowed_diagnoses <- c("MGUS","SMM","MM","RR")
+      allowed_diagnoses <- c("MGUS","SMM","MM","RRMM","PCL")
       allowed_types <- c("BM","PB","ST")
       
       # Initialize a list to store formatted error messages
