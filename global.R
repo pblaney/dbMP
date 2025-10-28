@@ -187,7 +187,7 @@ generate_sids_bulk <- function(database, data) {
 
 # Add authentication layer
 # set up login credentials
-user_creds <- readRDS("~/modules/rework/user_creds.rds")
+user_creds <- readRDS("user_creds.rds")
 
 # Table descriptions and definitions for display
 table_descript <- list(
