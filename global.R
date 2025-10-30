@@ -182,6 +182,29 @@ generate_sids_bulk <- function(database, data) {
   return(new_sids)
 }
 
+# Convert a value to a Date object, handling Excel's numeric date format.
+as_robust_date <- function(x) {
+  # If the value is already a date, do nothing.
+  if (inherits(x, "Date")) {
+    return(x)
+  }
+  
+  # If the value is numeric, assume it's an Excel date and convert it.
+  # The origin is the day before Excel's baseline of 1900-01-01.
+  if (is.numeric(x)) {
+    return(as.Date(x, origin = "1899-12-30"))
+  }
+  
+  # If it's a character, try parsing it with common formats.
+  if (is.character(x)) {
+    date_formats <- c("m/d/y", "m-d-y", "Y-m-d", "Y/m/d", "b d, Y", "B d, Y")
+    return(as.Date(parse_date_time(x, orders = date_formats, quiet = TRUE)))
+  }
+  
+  # If it's none of the above, return NA.
+  return(as.Date(NA))
+}
+
 #########################
 #####   Execution   #####
 
@@ -245,7 +268,7 @@ sample_template_info <- data.frame(
   `Allowed Values` = c(
     "Any existing IID",
     "YYYY-MM-DD format",
-    "Free text",
+    "Free text or NA",
     "Numeric",
     "MGUS, SMM, MM, RRMM, PCL",
     "BM, PB, ST",

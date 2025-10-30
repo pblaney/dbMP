@@ -664,6 +664,10 @@ function(input, output, session) {
       # Initialize the allowed values
       allowed_diagnoses <- c("MGUS","SMM","MM","RRMM","PCL")
       allowed_types <- c("BM","PB","ST")
+      date_formats <- c("m/d/y", "m-d-y", "Y-m-d", "Y/m/d", "b d, Y", "B d, Y")
+      
+      # We will store the clean, converted dates here
+      clean_dates <- as.Date(rep(NA, nrow(uploaded_data)))
       
       # Initialize a list to store formatted error messages
       all_errors <- list()
@@ -673,12 +677,13 @@ function(input, output, session) {
         row <- uploaded_data[i, ]
         row_errors <- c()
         
-        # Check visit_date
-        visit_date <- dmy(row$visit_date, quiet = TRUE)
+        # --- Check visit_date with multiple formats ---
+        visit_date <- as_robust_date(row$visit_date)
+        clean_dates[i] <- visit_date # Store the result
+        
         if (is.na(visit_date)) {
-          row_errors <- c(row_errors, "'visit_date' is not a valid date.")
-        }
-        if (!is.na(visit_date) & visit_date > Sys.Date()) {
+          row_errors <- c(row_errors, "'visit_date' is not a recognized date format.")
+        } else if (visit_date > Sys.Date()) {
           row_errors <- c(row_errors, "'visit_date' cannot be in the future.")
         }
         
@@ -723,19 +728,19 @@ function(input, output, session) {
       }
       
       # 4. --- DATA PREPARATION ---
-      # If checks pass, covert the date for all records
-      uploaded_data$visit_date <- dmy(uploaded_data$visit_date, quiet = TRUE)
-      
       # Now join the uploaded data with the associated PMIDs and check for NAs as timepoint or specimen ID
-      data_with_pmid <- uploaded_data %>%
-        mutate(tpt = ifelse(is.na(tpt), "NA", tpt),
+      # Replace the original visit_date column with our clean, standardized dates
+      updated_data <- uploaded_data %>%
+        mutate(visit_date = clean_dates,
+               tpt = ifelse(is.na(tpt), "NA", tpt),
                specimenid = ifelse(is.na(specimenid), "NA", specimenid)) %>%
         left_join(db_data()$patients %>% select(pmid, iid), by = "iid")
       
-      new_sids <- generate_sids_bulk(database = DBMP_ENV$conn, data = data_with_pmid)
+      new_sids <- generate_sids_bulk(database = DBMP_ENV$conn, data = updated_data)
 
-      final_df <- data_with_pmid %>%
-        mutate(sid = new_sids) %>%
+      final_df <- updated_data %>%
+        mutate(sid = new_sids,
+               visit_date = format(visit_date, "%Y-%m-%d")) %>%
         select(pmid, sid, all_of(expected_cols))
 
       # Store the prepared data frame
