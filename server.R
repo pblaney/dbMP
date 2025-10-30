@@ -437,7 +437,7 @@ function(input, output, session) {
     iids <- unique(db_data()$patients$iid)
     
     if (length(iids) > 0) {
-      updateSelectInput(session, "sample_iid_select", choices = c("Select an Institution ID" = "", sort(iids)))
+      updatePickerInput(session, "sample_iid_select", choices = c("Select an Institution ID" = "", sort(iids)))
     }
   })
   
@@ -481,7 +481,7 @@ function(input, output, session) {
     # Check 3: Timepoint field cannot be blank
     if (!isTruthy(trimws(input$sample_tpt))) {
       validation_passed <- FALSE
-      error_messages <- c(error_messages, "The Timepoint field cannot be blank.")
+      error_messages <- c(error_messages, "The Timepoint field cannot be blank (use 'NA' if not applicable).")
     }
     
     # Check 4: Age must be populated and cannot be younger than 18 and cannot be older than expected
@@ -683,8 +683,8 @@ function(input, output, session) {
         }
         
         # Check tpt
-        if (!isTruthy(trimws(row$tpt))) {
-          row_errors <- c(row_errors, "'tpt' cannot be blank.")
+        if (!is.na(row$tpt) & nchar(trimws(row$tpt)) == 0) {
+          row_errors <- c(row_errors, "'tpt' cannot be blank (use 'NA' if not applicable).")
         }
         
         # Check age
@@ -726,9 +726,10 @@ function(input, output, session) {
       # If checks pass, covert the date for all records
       uploaded_data$visit_date <- dmy(uploaded_data$visit_date, quiet = TRUE)
       
-      # Now join the uploaded data with the associated PMIDs and check for NAs as specimen ID
+      # Now join the uploaded data with the associated PMIDs and check for NAs as timepoint or specimen ID
       data_with_pmid <- uploaded_data %>%
-        mutate(specimenid = ifelse(is.na(specimenid), "NA", specimenid)) %>%
+        mutate(tpt = ifelse(is.na(tpt), "NA", tpt),
+               specimenid = ifelse(is.na(specimenid), "NA", specimenid)) %>%
         left_join(db_data()$patients %>% select(pmid, iid), by = "iid")
       
       new_sids <- generate_sids_bulk(database = DBMP_ENV$conn, data = data_with_pmid)

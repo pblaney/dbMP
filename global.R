@@ -123,8 +123,8 @@ generate_pmids_bulk <- function(database, n) {
 generate_sid <- function(database, patient_id, sample_type) {
   # Use parameterized queries to prevent SQL injection
   query <- "SELECT COUNT(*) FROM samples WHERE pmid = ? AND type = ?"
-  query_count <- DBI::dbGetQuery(conn = database, statement = query, params = list(patient_id, sample_type))
-  unique_sample_count < query_count[[1]] + 1
+  count_result <- DBI::dbGetQuery(conn = database, statement = query, params = list(patient_id, sample_type))
+  unique_sample_count <- count_result[[1]] + 1
   
   unique_sample_count_string <- sprintf("%02d", unique_sample_count)
   
@@ -235,7 +235,7 @@ sample_template_info <- data.frame(
   `Description` = c(
     "Institution ID for the patient. MUST already exist in the 'patients' table.",
     "Date the sample was collected at site.",
-    "Study timepoint for the sample at collection (e.g., Baseline, Progression).",
+    "Study timepoint for the sample at collection (e.g., Baseline, Progression; use 'NA' if not applicable).",
     "Patient's age in years at the time of the visit.",
     "Patient's diagnosis at the time of sample collection. One of MGUS, SMM, MM, RRMM, and PCL",
     "The type of biological sample. One of Bone Marrow (BM), Peripheral Blood (PB), or Stool (ST)",
@@ -507,8 +507,13 @@ dashboard_ui <- dashboardPage(
                     
                     # Select an existing sample
                     h4("Select an Existing Institution ID"),
-                    selectInput("sample_iid_select", "Filter by Institution ID:", 
-                                choices = NULL), # We'll populate this from the server
+                    pickerInput(inputId = "sample_iid_select",
+                                label = "Filter by Institution ID:", 
+                                choices = NULL,
+                                options = list(
+                                  `live-search` = TRUE,
+                                  `actions-box` = TRUE
+                                )), # We'll populate this from the server
                     
                     hr(), # A horizontal line to separate sections
                     
